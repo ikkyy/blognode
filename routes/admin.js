@@ -6,18 +6,20 @@ require("../models/Categoria")
 const Categoria = mongoose.model("categorias")
 require("../models/Postagem")
 const Postagem = mongoose.model("postagens")
+const {eAdmin} = require ("../helpers/eAdmin")
+
 
 // Rotas
-router.get('/', function(req, res){
+router.get('/', eAdmin, function(req, res){
     res.render("admin/index")
 })
 
-router.get('/posts', function(req, res){
+router.get('/posts', eAdmin, function(req, res){
     res.send("Página de Posts")
 })
 
 // Para Listar Categorias
-router.get('/categorias', function(req, res){
+router.get('/categorias', eAdmin, function(req, res){
     Categoria.find().sort({nome:'asc'}).then(function(categorias){
         res.render("admin/categorias", {categorias: categorias})
     }).catch(function(err){
@@ -27,11 +29,11 @@ router.get('/categorias', function(req, res){
 })
 
 // Para Adicionar Categorias
-router.get('/categorias/add', function(req, res){
+router.get('/categorias/add', eAdmin, function(req, res){
     res.render("admin/addcategorias")
 })
 
-router.post('/categorias/nova', function(req, res){
+router.post('/categorias/nova', eAdmin, function(req, res){
 
     // Validação de Erros
     var erros = []
@@ -65,7 +67,7 @@ router.post('/categorias/nova', function(req, res){
 })
 
 // Para Editar Categorias // Recebe as informações da categoria
-router.get("/categorias/edit/:id", function(req, res){
+router.get("/categorias/edit/:id", eAdmin, function(req, res){
     Categoria.findOne({_id:req.params.id}).then(function(categoria){
         res.render("admin/editcategorias", {categoria: categoria})
     }).catch(function(err){
@@ -76,7 +78,7 @@ router.get("/categorias/edit/:id", function(req, res){
 })
 
 // Para Editar Categorias // Salva no banco de dados as alterações
-router.post("/categorias/edit", function(req, res){
+router.post("/categorias/edit", eAdmin, function(req, res){
     Categoria.findOne({_id: req.body.id}).then(function(categoria){
         categoria.nome = req.body.nome
         categoria.slug = req.body.slug
@@ -97,7 +99,7 @@ router.post("/categorias/edit", function(req, res){
 
 
 // Para Deletar Categorias
-router.post("/categorias/deletar", function(req, res){
+router.post("/categorias/deletar", eAdmin, function(req, res){
     Categoria.remove({_id: req.body.id}).then(function(){
         req.flash("success_msg", "Categoria deletada com Sucesso!")
         res.redirect("/admin/categorias")
@@ -108,7 +110,7 @@ router.post("/categorias/deletar", function(req, res){
 })
 
 // Para Listar Postagens
-router.get("/postagens", function(req, res){
+router.get("/postagens", eAdmin, function(req, res){
     Postagem.find().populate("categoria").sort({data: "desc"}).then(function(postagens){
         res.render("admin/postagens", {postagens: postagens}).catch(function(err){
             req.flash("error_msg", "Houve um erro ao listar as postagens.")
@@ -119,7 +121,7 @@ router.get("/postagens", function(req, res){
 })
 
 // Para Adicionar Postagens
-router.get("/postagens/add", function(req, res){
+router.get("/postagens/add", eAdmin, function(req, res){
     //Faz a pesquisa pra listar as categorias
     Categoria.find().then(function(categorias){
         res.render("admin/addpostagem", {categorias: categorias})
@@ -130,7 +132,7 @@ router.get("/postagens/add", function(req, res){
 })
 
 // Para Salvar Postagens
-router.post("/postagens/nova", function(req, res){
+router.post("/postagens/nova", eAdmin, function(req, res){
     var erros = []
     if(req.body.categoria =="0"){
         erros.push({texto:"Categoria Inválida, registre uma categoria."})
@@ -159,7 +161,7 @@ router.post("/postagens/nova", function(req, res){
 })
 
 // Para Editar Postagens // Recebe as info pro formulário de edição.
-router.get("/postagens/edit/:id", function(req, res){
+router.get("/postagens/edit/:id", eAdmin, function(req, res){
     
     Postagem.findOne({_id: req.params.id}).then(function(postagem){
 
@@ -178,7 +180,7 @@ router.get("/postagens/edit/:id", function(req, res){
 })
 
 // Para Editar Postagens
-router.post("/postagens/edit", function(req, res){
+router.post("/postagens/edit", eAdmin, function(req, res){
     Postagem.findOne({_id: req.body.id}).then(function(postagem){
 
         postagem.titulo = req.body.titulo
@@ -205,7 +207,7 @@ router.post("/postagens/edit", function(req, res){
 })
 
 // Para Deletar Postagens (Outro método é mais recomendado)
-router.get("/postagens/deletar/:id", function(req, res){
+router.get("/postagens/deletar/:id", eAdmin, function(req, res){
     Postagem.remove({_id: req.params.id}).then(function(){
         req.flash("success_msg", "Mensagem Deletada com Sucesso.")
         res.redirect("/admin/postagens")
